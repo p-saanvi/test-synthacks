@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}History — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Assessment history for {{ patient.name }}</h1>
+  {% if history %}
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>Severity</th><th>Status</th><th>Remedy / notes</th></tr>
+    </thead>
+    <tbody>
+      {% for r in history %}
+      <tr>
+        <td>
+          {% if r.status in ('pending', 'monitoring') %}
+            <a href="{{ url_for('view_assessment', assessment_id=r.id) }}">{{ r.problem }}</a>
+          {% else %}
+            {{ r.problem }}
+          {% endif %}
+        </td>
+        <td><span class="badge badge-{{ r.severity }}">{{ r.severity }}</span></td>
+        <td><span class="badge badge-status">{{ r.status }}</span></td>
+        <td class="muted">{{ r.remedy }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No assessments yet.</p>
+  {% endif %}
+  <a class="btn btn-primary" href="{{ url_for('assess') }}">New assessment</a>
+</div>
+{% endblock %}

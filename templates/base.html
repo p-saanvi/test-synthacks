@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Health Decision Support System{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('start') }}">🩺 AI Health Decision Support</a>
+    <nav>
+      {% if nav_patient %}
+        <span>{{ nav_patient.name }}</span>
+        <a href="{{ url_for('assess') }}">New assessment</a>
+        <a href="{{ url_for('history') }}">History</a>
+        <a href="{{ url_for('logout') }}">Sign out</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    <div class="disclaimer">
+      This system is a decision-support tool and is <strong>not</strong> a replacement
+      for professional medical advice or emergency services. If you are experiencing a
+      life-threatening emergency, contact your local emergency number immediately.
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

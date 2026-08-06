@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}New assessment — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Quick severity test</h2>
+  <p class="muted">
+    Skips symptom analysis entirely and feeds a canned assessment straight into the
+    decision engine + hospital workflow — for testing that logic on its own while
+    severity/diagnosis is wired up separately.
+  </p>
+  <form method="post" action="{{ url_for('assess_quick') }}" class="btn-row">
+    <button class="btn btn-secondary" type="submit" name="severity" value="low">Low</button>
+    <button class="btn btn-secondary" type="submit" name="severity" value="medium">Medium</button>
+    <button class="btn btn-danger" type="submit" name="severity" value="high">High</button>
+    <button class="btn btn-danger" type="submit" name="severity" value="critical">Critical</button>
+  </form>
+</div>
+
+<div class="card">
+  <h1>Describe your symptoms</h1>
+  <form method="post" action="{{ url_for('assess') }}">
+    <label for="symptoms">What's going on?</label>
+    <textarea id="symptoms" name="symptoms" required placeholder="e.g. I've had a throbbing headache for 3 hours, sensitive to light, mild nausea..."></textarea>
+    <button class="btn btn-primary" type="submit">Analyze symptoms</button>
+  </form>
+</div>
+
+{% if history %}
+<div class="card">
+  <h2>Your recent assessments</h2>
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>Severity</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for r in history %}
+      <tr>
+        <td>
+          {% if r.status in ('pending', 'monitoring') %}
+            <a href="{{ url_for('view_assessment', assessment_id=r.id) }}">{{ r.problem }}</a>
+          {% else %}
+            {{ r.problem }}
+          {% endif %}
+        </td>
+        <td><span class="badge badge-{{ r.severity }}">{{ r.severity }}</span></td>
+        <td><span class="badge badge-status">{{ r.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

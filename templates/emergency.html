@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Emergency escalation — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>🚨 Emergency escalation — {{ assessment.problem }} <span class="badge badge-{{ assessment.severity }}">{{ assessment.severity }}</span></h1>
+  <p>Your case has been escalated. If this is a real emergency, call your local emergency
+  number now rather than relying on this system.</p>
+
+  <h2>Hospital</h2>
+  <p>
+    <strong>{{ summary.hospital.hospital_name }}</strong>
+    ({{ "%.1f"|format(summary.hospital.distance_km) }} km away, ETA {{ summary.hospital.eta_minutes }} min)
+  </p>
+  <p>
+    Status: <span class="badge badge-status">{{ summary.hospital.status }}</span>
+    &nbsp;·&nbsp; Contact attempts: {{ summary.hospital.attempts }}
+    {% if summary.hospital.confirmation_id %}
+      &nbsp;·&nbsp; Confirmation: {{ summary.hospital.confirmation_id }}
+    {% endif %}
+  </p>
+  <p class="mock-note">Hospital directory is simulated (no real hospital API yet) — selection, retry, and confirmation-tracking logic is real.</p>
+
+  <h2>Emergency contacts notified</h2>
+  {% if summary.notifications_sent %}
+  <ul class="log">
+    {% for line in summary.notifications_sent %}
+    <li>{{ line }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No emergency contacts on file.</p>
+  {% endif %}
+  <p class="mock-note">Mocked — email/SMS/WhatsApp/phone are simulated (see notifications/).</p>
+
+  <h2>Insurance &amp; estimated cost</h2>
+  <p>Estimated cost: <strong>${{ "%.2f"|format(summary.estimated_cost) }}</strong></p>
+  {% if summary.coverage %}
+  <p>
+    Covered: ${{ "%.2f"|format(summary.coverage.covered_amount) }} —
+    you owe: ${{ "%.2f"|format(summary.coverage.patient_owes) }}<br>
+    <span class="muted">{{ summary.coverage.notes }}</span>
+  </p>
+  {% endif %}
+  <p class="mock-note">Mocked — your teammate's insurance lookup/coverage integration replaces this.</p>
+
+  <a class="btn btn-primary" href="{{ url_for('assess') }}">Back to assessments</a>
+</div>
+{% endblock %}
