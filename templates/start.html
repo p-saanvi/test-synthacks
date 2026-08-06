@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Sign in — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Welcome</h1>
+  <p class="muted">Enter your name to start or continue an assessment. New names create a profile.</p>
+  <form method="post" action="{{ url_for('start') }}">
+    <label for="name">Your name</label>
+    <input type="text" id="name" name="name" required autofocus>
+    <button class="btn btn-primary" type="submit">Continue</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Set up profile — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Set up profile for {{ name }}</h1>
+  <p class="muted">
+    This is only used for the emergency escalation path (mock hospital + family
+    notifications + insurance check). All fields are optional except contact name.
+  </p>
+  <form method="post" action="{{ url_for('onboard') }}">
+    <input type="hidden" name="name" value="{{ name }}">
+
+    <label for="insurance_id">Insurance ID (optional)</label>
+    <input type="text" id="insurance_id" name="insurance_id" placeholder="e.g. DEMO-1000">
+
+    {% for i in contact_slots %}
+    <fieldset>
+      <legend>Emergency contact {{ i }}{% if i == 1 %} (recommended){% endif %}</legend>
+      <label for="contact_name_{{ i }}">Name</label>
+      <input type="text" id="contact_name_{{ i }}" name="contact_name_{{ i }}">
+
+      <label for="contact_relationship_{{ i }}">Relationship</label>
+      <input type="text" id="contact_relationship_{{ i }}" name="contact_relationship_{{ i }}" placeholder="e.g. Spouse, Parent">
+
+      <label for="contact_phone_{{ i }}">Phone</label>
+      <input type="tel" id="contact_phone_{{ i }}" name="contact_phone_{{ i }}">
+
+      <label for="contact_email_{{ i }}">Email</label>
+      <input type="email" id="contact_email_{{ i }}" name="contact_email_{{ i }}">
+
+      <label for="contact_whatsapp_{{ i }}">WhatsApp number</label>
+      <input type="tel" id="contact_whatsapp_{{ i }}" name="contact_whatsapp_{{ i }}">
+
+      <label for="contact_channel_{{ i }}">Preferred notification channel</label>
+      <select id="contact_channel_{{ i }}" name="contact_channel_{{ i }}">
+        <option value="phone">Phone call</option>
+        <option value="sms">SMS</option>
+        <option value="email">Email</option>
+        <option value="whatsapp">WhatsApp</option>
+      </select>
+    </fieldset>
+    {% endfor %}
+
+    <button class="btn btn-primary" type="submit">Save and continue</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Monitoring — AI Health Decision Support{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>{{ record.problem }} <span class="badge badge-{{ record.severity }}">{{ record.severity }}</span></h1>
+  <p><strong>Recommended remedy:</strong> {{ record.remedy }}</p>
+
+  {% if record.status in ('pending', 'monitoring') %}
+    {% if seconds_remaining > 0 %}
+      <p class="muted">Suggested check-in in about <span id="countdown">{{ seconds_remaining }}</span> seconds.
+      You don't have to wait — check in whenever you're ready.</p>
+    {% else %}
+      <p class="muted">It's about time to check in.</p>
+    {% endif %}
+
+    <h2>How are you feeling now?</h2>
+    <form method="post" action="{{ url_for('checkin', assessment_id=record.id) }}">
+      <div class="btn-row">
+        <button class="btn btn-success" type="submit" name="answer" value="recovered">I've recovered</button>
+        <button class="btn btn-danger" type="submit" name="answer" value="worse">Not better / worse</button>
+      </div>
+    </form>
+  {% elif record.status == 'completed' %}
+    <p class="flash">This assessment is complete — you reported feeling recovered. Take care!</p>
+  {% elif record.status == 'escalated' %}
+    <p class="flash">This case was escalated to the emergency workflow.</p>
+  {% endif %}
+
+  <p><a href="{{ url_for('assess') }}">&larr; Back to assessments</a></p>
+</div>
+
+<script>
+  // Purely cosmetic countdown — check-in is never blocked.
+  (function () {
+    const el = document.getElementById("countdown");
+    if (!el) return;
+    let remaining = parseInt(el.textContent, 10);
+    const timer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        el.textContent = "0";
+        clearInterval(timer);
+        return;
+      }
+      el.textContent = remaining;
+    }, 1000);
+  })();
+</script>
+{% endblock %}
