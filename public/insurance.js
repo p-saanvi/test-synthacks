@@ -1,3 +1,13 @@
+let currentProfile = null;
+let currentContacts = [];
+
+function refreshSidebar(overrides) {
+  renderProfileSidebar(document.getElementById('profile-sidebar-content'), {
+    profile: { ...currentProfile, ...overrides },
+    contacts: currentContacts,
+  });
+}
+
 (async function loadProfile() {
   try {
     const { profile } = await api.get('/api/profile');
@@ -10,10 +20,19 @@
       return;
     }
     document.getElementById('location-display').textContent = profile.location;
+
+    currentProfile = profile;
+    const { contacts } = await api.get('/api/contacts');
+    currentContacts = contacts;
+    refreshSidebar();
   } catch (e) {
     window.location.href = 'signin.html';
   }
 })();
+
+document.getElementById('insurance-provider').addEventListener('input', (e) => {
+  refreshSidebar({ insurance_provider: e.target.value.trim() });
+});
 
 document.getElementById('insurance-form').addEventListener('submit', async (e) => {
   e.preventDefault();

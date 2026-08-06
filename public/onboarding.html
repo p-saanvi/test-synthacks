@@ -12,7 +12,7 @@
     <p>Tell us a bit about yourself and who to contact in an emergency.</p>
   </header>
 
-  <div class="page-wrap">
+  <div class="layout">
     <div class="card">
       <h2>Your Profile</h2>
       <form id="onboarding-form">
@@ -51,6 +51,13 @@
         <button type="submit">Submit</button>
       </form>
     </div>
+
+    <aside class="profile-sidebar">
+      <h3>Your Profile</h3>
+      <div id="profile-sidebar-content">
+        <p class="empty-hint">Fill in the form to see your profile here.</p>
+      </div>
+    </aside>
   </div>
 
   <template id="contact-template">
@@ -61,7 +68,15 @@
       <label>Relationship</label>
       <input type="text" class="contact-relationship" placeholder="e.g. Mother, Spouse" required />
       <label>Phone</label>
-      <input type="tel" class="contact-phone" required />
+      <input
+        type="tel"
+        class="contact-phone"
+        inputmode="tel"
+        pattern="\+?[0-9\s\(\)\-]{7,20}"
+        title="Digits only (you can use +, -, spaces, and parentheses)"
+        placeholder="e.g. 555-123-4567"
+        required
+      />
       <label>Email (optional)</label>
       <input type="email" class="contact-email" />
     </div>

@@ -232,3 +232,79 @@ button.secondary:hover, .btn.secondary:hover {
   margin-bottom: 4px;
   color: var(--blue-dark);
 }
+
+/* Two-column layout: form/card on the left, live profile summary on the right */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 860px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.layout .card {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: sticky;
+  top: 24px;
+}
+
+.profile-sidebar h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--blue-dark);
+}
+
+.profile-sidebar dl {
+  margin: 0;
+}
+
+.profile-sidebar dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+.profile-sidebar dt.contacts-heading {
+  margin-top: 18px;
+}
+
+.profile-sidebar dd {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+}
+
+.profile-sidebar .contact-item {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 10px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.profile-sidebar .empty-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 760px) {
+  .layout {
+    flex-direction: column;
+  }
+  .profile-sidebar {
+    width: 100%;
+    position: static;
+  }
+}

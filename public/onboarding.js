@@ -14,6 +14,22 @@ function addContactBlock() {
 
 document.getElementById('add-contact').addEventListener('click', addContactBlock);
 
+const sidebarContent = document.getElementById('profile-sidebar-content');
+
+function updateSidebarFromForm() {
+  const draftProfile = {
+    name: document.getElementById('name').value.trim(),
+    gender: document.getElementById('gender').value,
+    age: document.getElementById('age').value,
+    height_cm: document.getElementById('height').value,
+    weight_kg: document.getElementById('weight').value,
+    location: document.getElementById('location').value.trim(),
+  };
+  renderProfileSidebar(sidebarContent, { profile: draftProfile, contacts: collectContacts() });
+}
+
+document.getElementById('onboarding-form').addEventListener('input', updateSidebarFromForm);
+
 function collectContacts() {
   return Array.from(contactsContainer.querySelectorAll('.contact-block')).map((block) => ({
     name: block.querySelector('.contact-name').value.trim(),
@@ -46,6 +62,14 @@ document.getElementById('onboarding-form').addEventListener('submit', async (e) 
   const contacts = collectContacts();
   if (contacts.length === 0 || contacts.some((c) => !c.name || !c.relationship || !c.phone)) {
     errorMsg.textContent = 'Please fill in name, relationship, and phone for every contact.';
+    return;
+  }
+  if (contacts.some((c) => !isValidPhone(c.phone))) {
+    errorMsg.textContent = 'Phone numbers can only contain digits (e.g. 555-123-4567).';
+    return;
+  }
+  if (contacts.some((c) => c.email && !isValidEmail(c.email))) {
+    errorMsg.textContent = 'Please enter a valid contact email address (e.g. name@example.com).';
     return;
   }
 

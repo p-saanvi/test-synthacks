@@ -6,6 +6,18 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+function isValidPhone(phone) {
+  if (typeof phone !== 'string') return false;
+  const trimmed = phone.trim();
+  if (!/^\+?[0-9\s()\-]+$/.test(trimmed)) return false;
+  const digitCount = (trimmed.match(/\d/g) || []).length;
+  return digitCount >= 7 && digitCount <= 15;
+}
+
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email.trim());
+}
+
 router.get('/', (req, res) => {
   const contacts = db
     .prepare(
@@ -27,6 +39,16 @@ router.post('/', (req, res) => {
     if (!contact.name || !contact.relationship || !contact.phone) {
       return res.status(400).json({
         error: 'Each contact needs a name, relationship, and phone number',
+      });
+    }
+    if (!isValidPhone(contact.phone)) {
+      return res.status(400).json({
+        error: 'Phone numbers can only contain digits (e.g. 555-123-4567)',
+      });
+    }
+    if (contact.email && !isValidEmail(contact.email)) {
+      return res.status(400).json({
+        error: 'Please enter a valid contact email address (e.g. name@example.com)',
       });
     }
   }

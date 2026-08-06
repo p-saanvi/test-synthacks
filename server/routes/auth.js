@@ -17,11 +17,18 @@ function issueSession(res, userId) {
   res.cookie('token', token, COOKIE_OPTIONS);
 }
 
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email.trim());
+}
+
 router.post('/signup', (req, res) => {
   const { email, username, password } = req.body;
 
   if (!email || !username || !password) {
     return res.status(400).json({ error: 'Email, username, and password are all required' });
+  }
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'Please enter a valid email address (e.g. name@example.com)' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });

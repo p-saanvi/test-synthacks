@@ -11,7 +11,7 @@
     <h1>Health 360</h1>
   </header>
 
-  <div class="page-wrap">
+  <div class="layout">
     <div class="card">
       <h2>You're all set! ✅</h2>
       <p class="hint">
@@ -23,10 +23,27 @@
         <button type="button" class="secondary" id="logout-btn">Sign Out</button>
       </form>
     </div>
+
+    <aside class="profile-sidebar">
+      <h3>Your Profile</h3>
+      <div id="profile-sidebar-content">
+        <p class="empty-hint">Loading…</p>
+      </div>
+    </aside>
   </div>
 
   <script src="api.js"></script>
   <script>
+    (async function loadProfile() {
+      try {
+        const { profile } = await api.get('/api/profile');
+        const { contacts } = await api.get('/api/contacts');
+        renderProfileSidebar(document.getElementById('profile-sidebar-content'), { profile, contacts });
+      } catch (e) {
+        // Not logged in or nothing saved yet — leave the sidebar's loading state as-is.
+      }
+    })();
+
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await api.post('/api/auth/logout');
       window.location.href = 'index.html';

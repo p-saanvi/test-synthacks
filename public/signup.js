@@ -28,6 +28,11 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('password').value;
   const confirmPassword = document.getElementById('confirm-password').value;
 
+  if (!isValidEmail(email)) {
+    errorMsg.textContent = 'Please enter a valid email address (e.g. name@example.com).';
+    return;
+  }
+
   if (password !== confirmPassword) {
     errorMsg.textContent = 'Passwords do not match.';
     return;
