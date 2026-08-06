@@ -59,6 +59,18 @@ document.getElementById('onboarding-form').addEventListener('submit', async (e) 
   const errorMsg = document.getElementById('error-msg');
   errorMsg.textContent = '';
 
+  const name = document.getElementById('name').value.trim();
+  const gender = document.getElementById('gender').value;
+  const age = document.getElementById('age').value;
+  const height = document.getElementById('height').value;
+  const weight = document.getElementById('weight').value;
+  const location = document.getElementById('location').value.trim();
+
+  if (!name || !gender || !age || !height || !weight || !location) {
+    errorMsg.textContent = 'Please fill in every personal info field.';
+    return;
+  }
+
   const contacts = collectContacts();
   if (contacts.length === 0 || contacts.some((c) => !c.name || !c.relationship || !c.phone)) {
     errorMsg.textContent = 'Please fill in name, relationship, and phone for every contact.';
