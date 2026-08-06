@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="500" height="160" viewBox="0 0 500 160">
-  <rect width="500" height="160" rx="12" fill="#1e1e2e"/>
-  <circle cx="24" cy="24" r="7" fill="#ff5f56"/>
-  <circle cx="46" cy="24" r="7" fill="#ffbd2e"/>
-  <circle cx="68" cy="24" r="7" fill="#27c93f"/>
-  <text x="30" y="90" font-family="Menlo, Consolas, monospace" font-size="20" fill="#a6e3a1">$ python3 hello.py</text>
-  <text x="30" y="125" font-family="Menlo, Consolas, monospace" font-size="24" fill="#f5e0dc">Hello, World!</text>
-</svg>
