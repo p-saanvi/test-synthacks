@@ -6,11 +6,17 @@ const router = express.Router();
 
 router.use(requireAuth);
 
+// The AI triage app (Flask, Python) — symptom analysis via qwen_triage.py
+// (Qwen3-14B) and hospital contact. It shares this same SQLite database
+// (server/health360.db), so it reads a user's profile directly instead of
+// this endpoint needing to push data to it over HTTP.
+const TRIAGE_APP_URL = process.env.TRIAGE_APP_URL || 'http://localhost:5000';
+
 /**
- * Placeholder "AI slot" — send-insurance.
- * Real integration (planned: an open-source model like Qwen-12B) plugs in
- * here later. For now this just saves the insurance provider and logs what
- * would be sent to the AI.
+ * send-insurance — saves the insurance provider. Called before send-profile
+ * so the AI triage app always has insurance on file before it needs it
+ * (hospital selection there isn't insurance-filtered yet, but this ordering
+ * keeps the data available for whenever that's added).
  */
 router.post('/send-insurance', (req, res) => {
   const { insuranceProvider } = req.body;
@@ -33,13 +39,11 @@ router.post('/send-insurance', (req, res) => {
 });
 
 /**
- * Placeholder "AI slot" — send-profile.
- * Called AFTER insurance is saved, so the payload always includes insurance.
- * This is the hand-off point where the real AI should search for nearby
- * hospitals and filter out any hospital that does NOT accept the user's
- * insurance — only in-network hospitals should ever be returned.
- * Expected eventual response shape:
- *   { hospitals: [{ name, address, distanceKm, acceptsInsurance }, ...] }
+ * send-profile — called after insurance is saved. Confirms the profile is
+ * complete and hands back the URL to the AI triage app; it reads this same
+ * user's profile straight out of the shared database (see
+ * database/db.py / qwen_triage.py on the Python side) rather than this
+ * endpoint pushing the data over HTTP.
  */
 router.post('/send-profile', (req, res) => {
   const profile = db
@@ -57,11 +61,9 @@ router.post('/send-profile', (req, res) => {
     .prepare('SELECT name, relationship, phone, email FROM emergency_contacts WHERE user_id = ?')
     .all(req.userId);
 
-  const payload = { userId: req.userId, ...profile, emergencyContacts: contacts };
-  console.log('[AI SLOT] send-profile ->', payload);
+  console.log('[AI SLOT] send-profile ->', { userId: req.userId, ...profile, emergencyContacts: contacts });
 
-  // Placeholder response until the real AI is plugged in.
-  res.json({ ok: true, hospitals: [] });
+  res.json({ ok: true, triageUrl: `${TRIAGE_APP_URL}/?user_id=${req.userId}` });
 });
 
 module.exports = router;

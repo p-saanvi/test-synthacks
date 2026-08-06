@@ -3,11 +3,15 @@
 {% block content %}
 <div class="card">
   <h1>Welcome</h1>
-  <p class="muted">Enter your name to start or continue an assessment. New names create a profile.</p>
-  <form method="post" action="{{ url_for('start') }}">
-    <label for="name">Your name</label>
-    <input type="text" id="name" name="name" required autofocus>
-    <button class="btn btn-primary" type="submit">Continue</button>
-  </form>
+  <p class="muted">
+    Sign up and finish your profile on Health 360 first — this app reads that
+    same profile (name, emergency contacts, insurance) instead of asking for
+    it again, and uses it for symptom triage.
+  </p>
+  <a class="btn btn-primary" href="{{ health360_url }}">Go to Health 360</a>
+  <p class="muted" style="margin-top: 1rem;">
+    Already signed up? Use the "Continue to Symptom Check" link on your
+    Health 360 confirmation page to come back here signed in.
+  </p>
 </div>
 {% endblock %}

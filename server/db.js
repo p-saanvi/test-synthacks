@@ -41,4 +41,19 @@ db.exec(`
   );
 `);
 
+// Columns added after the tables above already shipped — added defensively
+// so upgrading an existing health360.db doesn't require a manual migration.
+// These are used by the Flask triage app (shares this same database file).
+function addColumnIfMissing(table, column, definition) {
+  const existing = db.prepare(`PRAGMA table_info(${table})`).all();
+  const hasColumn = existing.some((col) => col.name === column);
+  if (!hasColumn) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+addColumnIfMissing('profiles', 'insurance_id', 'TEXT');
+addColumnIfMissing('emergency_contacts', 'whatsapp', 'TEXT');
+addColumnIfMissing('emergency_contacts', 'preferred_channel', "TEXT DEFAULT 'phone'");
+
 module.exports = db;

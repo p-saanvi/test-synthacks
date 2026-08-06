@@ -15,10 +15,11 @@
     <div class="card">
       <h2>You're all set! ✅</h2>
       <p class="hint">
-        Your profile, emergency contacts, and insurance are saved. We're using
-        them to find nearby hospitals that accept your insurance — check back
-        soon for your results.
+        Your profile, emergency contacts, and insurance are saved.
       </p>
+      <a class="btn" id="triage-link" href="#" style="display: none;">
+        Continue to Symptom Check
+      </a>
       <form id="logout-form">
         <button type="button" class="secondary" id="logout-btn">Sign Out</button>
       </form>
@@ -39,6 +40,15 @@
         const { profile } = await api.get('/api/profile');
         const { contacts } = await api.get('/api/contacts');
         renderProfileSidebar(document.getElementById('profile-sidebar-content'), { profile, contacts });
+
+        // send-profile is safe to call again here — it just confirms the
+        // profile is complete and hands back the link to the AI triage app.
+        const { triageUrl } = await api.post('/api/ai/send-profile', {});
+        if (triageUrl) {
+          const link = document.getElementById('triage-link');
+          link.href = triageUrl;
+          link.style.display = '';
+        }
       } catch (e) {
         // Not logged in or nothing saved yet — leave the sidebar's loading state as-is.
       }

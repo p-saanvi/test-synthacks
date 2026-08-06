@@ -1,80 +1,101 @@
 """
-MOCK symptom analysis (stand-in for the real LLM integration).
+Real symptom analysis — adapts qwen_triage.py's Qwen3-14B triage decision
+into the SymptomAssessment shape decision_engine.py / remedy_manager.py /
+emergency_manager.py already expect, so nothing downstream had to change.
 
-Owned by teammate responsibilities ("AI (LLM) integration", "Prompt
-engineering", "Parsing structured JSON responses" — see
-AI_Health_Decision_System_Overview.md). This scope is the decision engine +
-hospital contact workflow, not symptom analysis, so this stub uses simple
-keyword matching instead of a real model call — no API key, no network call,
-no cost. It returns the same SymptomAssessment shape a real LLM would, so
-decision_engine.py and hospital_manager.py can be built/tested end-to-end
-without depending on an LLM provider.
+qwen_triage.triage() decides REMEDY / AMBULANCE / REQUEST_MEDIA directly
+(it doesn't reason in terms of decision_engine.py's low/medium/high/critical
+severity scale) — this adapter maps that onto `severity` via the model's own
+`urgency` field, which uses the same four levels. REQUEST_MEDIA fails safe
+to a critical assessment: there's no photo/video upload step in the web app
+yet, so — same as qwen_triage's own CLI does when no media is provided — we
+don't leave the patient stuck, we route to the emergency path.
 
-A fully working, tested OpenRouter + LLM implementation is kept in
-llm_interface_openrouter.py, ready to swap in when that responsibility is
-picked up (see its docstring for how).
+Requires OPENROUTER_API_KEY to be set (see qwen_triage.py's module
+docstring for setup). The previous keyword-based mock this replaced is
+still worth knowing about if you ever need to run/demo without an API key —
+see git history.
 """
 
 from __future__ import annotations
 
-from models import SymptomAssessment
+import os
 
-# Ordered most- to least-severe: first matching keyword set wins.
-_CRITICAL_KEYWORDS = [
-    "chest pain", "can't breathe", "cannot breathe", "difficulty breathing",
-    "unconscious", "unresponsive", "severe bleeding", "heavy bleeding",
-    "stroke", "slurred speech", "face drooping", "suicidal", "overdose",
-    "anaphylaxis", "seizure", "not breathing",
-]
-_HIGH_KEYWORDS = [
-    "high fever", "severe pain", "persistent vomiting", "broken bone",
-    "fracture", "worsening", "dehydrated", "confusion", "allergic reaction",
-    "severe headache", "blood in",
-]
-_MEDIUM_KEYWORDS = [
-    "fever", "vomiting", "dizzy", "dizziness", "rash", "migraine",
-    "moderate pain", "persistent", "nausea", "sore throat",
-]
+import qwen_triage
+from models import Patient, SymptomAssessment
+
+_REACTION_TIME_BY_URGENCY = {
+    "low": 3600,
+    "medium": 1800,
+    "high": 180,
+    "critical": 60,
+}
 
 
 class LLMResponseError(RuntimeError):
     """Raised when symptom analysis cannot produce a valid assessment."""
 
 
-def assess_symptoms(symptoms_text: str) -> SymptomAssessment:
-    """
-    MOCK: classify free-text symptoms by keyword matching instead of calling
-    an LLM. Kept intentionally simple — this is not the part of the system
-    being built out here (see module docstring).
-    """
-    text = (symptoms_text or "").strip().lower()
+def _patient_to_profile(patient: Patient) -> qwen_triage.PatientProfile:
+    contacts = [
+        qwen_triage.EmergencyContact(
+            name=c.name, phone=c.phone or "", relationship=c.relationship
+        )
+        for c in patient.emergency_contacts
+    ]
+    return qwen_triage.PatientProfile(
+        name=patient.name,
+        gender=patient.gender or "unspecified",
+        height_cm=patient.height_cm or 0.0,
+        weight_kg=patient.weight_kg or 0.0,
+        location=patient.location or "",
+        emergency_contacts=contacts,
+        insurance_provider=patient.insurance_provider,
+        insurance_id=patient.insurance_id,
+    )
+
+
+def assess_symptoms(symptoms_text: str, patient: Patient) -> SymptomAssessment:
+    text = (symptoms_text or "").strip()
     if not text:
         raise LLMResponseError("No symptoms text provided.")
 
-    if any(k in text for k in _CRITICAL_KEYWORDS):
+    if not os.environ.get("OPENROUTER_API_KEY"):
+        raise LLMResponseError(
+            "OPENROUTER_API_KEY is not set. Copy .env.example to .env and add your key."
+        )
+
+    profile = _patient_to_profile(patient)
+    result = qwen_triage.triage(profile, text)
+
+    if result.decision == "REQUEST_MEDIA":
         return SymptomAssessment(
-            problem="Potential medical emergency",
+            problem="Needs in-person evaluation",
             severity="critical",
-            remedy="Seek emergency medical care immediately — do not wait.",
-            reaction_time=60,
+            remedy=(
+                "The AI could not safely assess this from a text description alone "
+                f"({result.media_request_reason or 'more detail needed'}) and this app "
+                "doesn't support photo/video upload yet — seek in-person medical "
+                "evaluation immediately."
+            ),
+            reaction_time=_REACTION_TIME_BY_URGENCY["critical"],
         )
-    if any(k in text for k in _HIGH_KEYWORDS):
-        return SymptomAssessment(
-            problem="Symptoms warranting prompt care",
-            severity="high",
-            remedy="Contact a hospital promptly for evaluation.",
-            reaction_time=180,
+
+    urgency = result.urgency if result.urgency in _REACTION_TIME_BY_URGENCY else (
+        "critical" if result.decision == "AMBULANCE" else "medium"
+    )
+    problem = (result.reasoning or result.decision.replace("_", " ").title())[:120]
+    if result.decision == "AMBULANCE":
+        remedy = (
+            result.remedy_advice
+            or "This has been flagged as a potential emergency — seek immediate medical care."
         )
-    if any(k in text for k in _MEDIUM_KEYWORDS):
-        return SymptomAssessment(
-            problem="Mild-to-moderate symptoms",
-            severity="medium",
-            remedy="Rest, hydrate, and monitor closely. Seek care if symptoms worsen.",
-            reaction_time=1800,
-        )
+    else:
+        remedy = result.remedy_advice or "Rest and monitor your symptoms."
+
     return SymptomAssessment(
-        problem="Minor symptoms",
-        severity="low",
-        remedy="Rest and monitor at home. No red-flag symptoms detected.",
-        reaction_time=3600,
+        problem=problem,
+        severity=urgency,
+        remedy=remedy,
+        reaction_time=_REACTION_TIME_BY_URGENCY[urgency],
     )

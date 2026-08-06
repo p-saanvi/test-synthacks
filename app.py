@@ -3,10 +3,13 @@ Flask web app entry point for the AI Health Decision Support System.
 
 Flow (see README.md / AI_Health_Decision_System_Overview.md):
 
+    Sign up + onboard on Health 360 (Node.js app, port 4000)
+            |
+            v  (link with ?user_id=..., shared database)
     User describes symptoms (web form)
             |
             v
-    LLM analyzes symptoms (llm_interface.py)
+    LLM analyzes symptoms (llm_interface.py -> qwen_triage.py)
             |
             v
     Structured JSON (models.SymptomAssessment)
@@ -34,14 +37,12 @@ import emergency_manager
 import llm_interface
 import remedy_manager
 from database import db
-from models import AssessmentRecord, EmergencyContact, Patient, SymptomAssessment
+from models import AssessmentRecord, Patient, SymptomAssessment
 
 app = Flask(__name__)
 app.secret_key = config.FLASK_SECRET_KEY
 
 db.init_db()
-
-CONTACT_SLOTS = 2  # number of emergency-contact form rows on the onboarding page
 
 # Quick-severity test buttons: bypass symptom analysis entirely and feed a
 # canned assessment straight into the decision engine / hospital workflow.
@@ -87,55 +88,35 @@ def inject_patient():
     return {"nav_patient": current_patient()}
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def start():
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Please enter your name.")
-            return redirect(url_for("start"))
-        existing = db.get_patient_by_name(name)
-        if existing:
-            session["patient_id"] = existing.id
-            return redirect(url_for("assess"))
-        return redirect(url_for("onboard", name=name))
+    """
+    Entry point for someone arriving from Health 360's "Continue to Symptom
+    Check" link (?user_id=<their Health 360 account id> — see
+    server/routes/ai.js and public/done.html on the Node.js side). Account
+    creation and onboarding both happen over there, not here; this app just
+    reads that same profile out of the shared database.
+    """
+    user_id = request.args.get("user_id", type=int)
+    if user_id is not None:
+        session["patient_id"] = user_id
 
-    if current_patient():
+    patient_id = session.get("patient_id")
+    if patient_id and db.is_profile_complete(patient_id):
         return redirect(url_for("assess"))
-    return render_template("start.html")
+
+    if patient_id:
+        # Signed in, but onboarding isn't finished on the Health 360 side yet.
+        session.pop("patient_id", None)
+        flash("Please finish setting up your profile on Health 360 first.")
+
+    return render_template("start.html", health360_url=config.HEALTH360_URL)
 
 
-@app.route("/onboard", methods=["GET", "POST"])
+@app.route("/onboard")
 def onboard():
-    name = request.values.get("name", "").strip()
-    if not name:
-        return redirect(url_for("start"))
-
-    if request.method == "POST":
-        insurance_id = request.form.get("insurance_id", "").strip() or None
-        contacts: list[EmergencyContact] = []
-        for i in range(1, CONTACT_SLOTS + 1):
-            cname = request.form.get(f"contact_name_{i}", "").strip()
-            if not cname:
-                continue
-            contacts.append(
-                EmergencyContact(
-                    name=cname,
-                    relationship=request.form.get(f"contact_relationship_{i}", "").strip(),
-                    phone=request.form.get(f"contact_phone_{i}", "").strip() or None,
-                    email=request.form.get(f"contact_email_{i}", "").strip() or None,
-                    whatsapp=request.form.get(f"contact_whatsapp_{i}", "").strip() or None,
-                    preferred_channel=request.form.get(f"contact_channel_{i}", "phone"),
-                )
-            )
-        patient = db.get_or_create_patient(
-            Patient(id=None, name=name, insurance_id=insurance_id, emergency_contacts=contacts)
-        )
-        session["patient_id"] = patient.id
-        flash(f"Welcome, {patient.name} — your profile is set up.")
-        return redirect(url_for("assess"))
-
-    return render_template("onboard.html", name=name, contact_slots=range(1, CONTACT_SLOTS + 1))
+    # Account creation + onboarding are owned by Health 360 now — see start().
+    return redirect(config.HEALTH360_URL)
 
 
 def _route_assessment(patient: Patient, symptoms_text: str, assessment: SymptomAssessment):
@@ -171,7 +152,7 @@ def assess():
             return redirect(url_for("assess"))
 
         try:
-            assessment = llm_interface.assess_symptoms(symptoms_text)
+            assessment = llm_interface.assess_symptoms(symptoms_text, patient)
         except llm_interface.LLMResponseError as exc:
             flash(f"Could not get a valid assessment: {exc}")
             return redirect(url_for("assess"))

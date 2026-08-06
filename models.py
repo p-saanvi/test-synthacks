@@ -79,6 +79,15 @@ class Patient:
     name: str
     insurance_id: Optional[str] = None
     emergency_contacts: list[EmergencyContact] = field(default_factory=list)
+    # Full profile, as collected by the Health 360 sign-up/onboarding app
+    # (shares this project's database — see database/db.py). Optional
+    # because older code paths may still construct a bare Patient.
+    gender: Optional[str] = None
+    age: Optional[int] = None
+    height_cm: Optional[float] = None
+    weight_kg: Optional[float] = None
+    location: Optional[str] = None
+    insurance_provider: Optional[str] = None
 
 
 @dataclass
