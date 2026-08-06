@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Health 360</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Health 360</h1>
+  </header>
+
+  <div class="page-wrap">
+    <div class="card">
+      <h2>Create Account</h2>
+      <p class="hint" id="terms-status">You need to accept the Terms &amp; Conditions before creating an account.</p>
+
+      <form id="signup-form" novalidate>
+        <fieldset id="signup-fields" disabled style="border: none; padding: 0; margin: 0;">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email" />
+
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autocomplete="username" />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" />
+
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" required minlength="6" autocomplete="new-password" />
+
+          <div class="error" id="error-msg"></div>
+          <button type="submit">Create Account</button>
+        </fieldset>
+      </form>
+      <div class="link-row">
+        Already have an account? <a href="signin.html">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions side panel -->
+  <div class="overlay open" id="terms-overlay"></div>
+  <div class="side-panel open" id="terms-panel">
+    <h2>Terms &amp; Conditions</h2>
+    <div class="terms-text">
+      <p>Welcome to Health 360. Before creating an account, please review the following:</p>
+      <p>1. The information you provide (personal details, emergency contacts, insurance) will be
+        stored securely and used to help find nearby, insurance-compatible hospitals and to share
+        with your listed emergency contacts if needed.</p>
+      <p>2. You confirm the information you submit is accurate to the best of your knowledge.</p>
+      <p>3. Health 360 is a support tool and does not replace professional medical advice — in an
+        emergency, always contact local emergency services directly.</p>
+      <p>4. Disclaimer: Health 360 and its creators are not responsible for any patient's health,
+        treatment, or outcomes arising from use of this website. You use this service at your own
+        risk and remain responsible for your own medical decisions.</p>
+      <p>5. You can update or remove your information at any time.</p>
+      <p>By clicking "Accept", you agree to these terms.</p>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="secondary" id="decline-terms">Decline</button>
+      <button type="button" id="accept-terms">Accept</button>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    Disclaimer: Health 360 is a support tool, not a medical provider. We are
+    not responsible for any patient's health, treatment, or outcomes while
+    using this website. Always consult a qualified medical professional, and
+    contact local emergency services directly in an emergency.
+  </footer>
+
+  <script src="api.js"></script>
+  <script src="signup.js"></script>
+</body>
+</html>

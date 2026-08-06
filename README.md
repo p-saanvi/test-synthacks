@@ -1,4 +1,55 @@
-# AI Health Decision Support System
+# test-synthacks
+
+This is a test to see if 2 boys and 1 girl can solve the healthcare crisis.
+
+This repo currently holds two separate, independently-runnable projects
+built by the team:
+
+- **[Health 360](#health-360)** (`server/`, `public/`) — a Node.js signup /
+  onboarding web app: account creation, personal profile + emergency
+  contacts, insurance capture, and a placeholder API hand-off to the AI
+  hospital-search backend below.
+- **[AI Health Decision Support System](#ai-health-decision-support-system)**
+  (root-level `.py` files, `templates/`, `static/`, `notifications/`,
+  `database/`) — a Flask app implementing symptom triage, a decision engine
+  (home remedy vs. emergency), and real hospital-contact logic with retry
+  and confirmation tracking.
+
+They're independent apps in the same repo for now — each has its own setup
+below and its own server (Health 360 on :4000, the Flask app on :5000).
+
+---
+
+## Health 360
+
+See [`memory.md`](./memory.md) for a full project overview (flow, data model,
+and the AI hand-off API contract).
+
+### Running locally
+
+```bash
+cd server
+npm install
+node server.js
+```
+
+The server starts at http://localhost:4000 and serves the website itself
+(from `/public`) as well as the API. A `health360.db` SQLite file is created
+automatically in `server/` the first time you run it — no extra setup needed.
+
+Then open http://localhost:4000 in your browser and either **Create Account**
+or **Sign In**.
+
+### Project layout
+
+- `server/` — Node.js + Express backend, SQLite database, and the API
+  (auth, profile, emergency contacts, and the placeholder "AI slot" that
+  hands data off to the hospital-search AI a teammate is building).
+- `public/` — plain HTML/CSS/JS frontend pages (no framework).
+
+---
+
+## AI Health Decision Support System
 
 A Flask web app implementing the workflow described in
 `AI_Health_Decision_System_Overview.md`: a user describes their symptoms,
@@ -9,7 +60,7 @@ escalation flow that contacts a hospital.
 > **Not medical advice.** This is a decision-support tool, not a replacement
 > for professional medical advice or emergency services.
 
-## Scope: what's fully implemented vs. mocked
+### Scope: what's fully implemented vs. mocked
 
 This build's actual scope is **the decision engine (remedy vs. hospital) and
 the hospital-contact workflow** — not symptom analysis. Those two pieces are
@@ -36,7 +87,7 @@ of the system.
 Every mock file has a docstring flagging it as a stub with notes on what a
 real integration would need. Mocked sections are also labeled in the UI.
 
-## Setup
+### Setup
 
 ```bash
 cd ai-health-decision-system
@@ -51,7 +102,7 @@ No API key is required to run the app — symptom analysis is a local mock
 `llm_interface_openrouter.py` later, or want to change Flask/hospital-retry
 settings.
 
-## Run
+### Run
 
 ```bash
 python app.py
@@ -74,7 +125,7 @@ Then open http://localhost:5000 in your browser.
    tracking), mock family notifications, mock insurance/cost estimate.
 5. **History** page lists all past assessments and their status.
 
-## Project structure
+### Project structure
 
 ```
 ai-health-decision-system/
@@ -108,7 +159,7 @@ ai-health-decision-system/
     └── patients.db                   # created on first run
 ```
 
-## Notes on design decisions
+### Notes on design decisions
 
 - **Hospital contact is the core built piece**: `hospital_manager.py` picks a
   hospital (critical cases prefer trauma/cardiac-capable facilities; others
@@ -133,7 +184,7 @@ ai-health-decision-system/
   never blocks a request on `reaction_time` — the monitor page shows a
   cosmetic countdown but lets the patient check in at any time via a button.
 
-## Next steps (from "Future Improvements" in the overview)
+### Next steps (from "Future Improvements" in the overview)
 
 Voice input, GPS-based hospital lookup, wearable integration, medical
 history support, and risk score/confidence estimation are not implemented
