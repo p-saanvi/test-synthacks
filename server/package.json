@@ -1,0 +1,17 @@
+{
+  "name": "health360-server",
+  "version": "1.0.0",
+  "description": "Health 360 backend: auth, profile, emergency contacts, and the AI hand-off slot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Set — Health 360</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Health 360</h1>
+  </header>
+
+  <div class="page-wrap">
+    <div class="card">
+      <h2>You're all set! ✅</h2>
+      <p class="hint">
+        Your profile, emergency contacts, and insurance are saved. We're using
+        them to find nearby hospitals that accept your insurance — check back
+        soon for your results.
+      </p>
+      <form id="logout-form">
+        <button type="button" class="secondary" id="logout-btn">Sign Out</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await api.post('/api/auth/logout');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

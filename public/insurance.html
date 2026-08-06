@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Insurance — Health 360</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Health 360</h1>
+    <p>One last step — this helps us only show you hospitals that accept your insurance.</p>
+  </header>
+
+  <div class="page-wrap">
+    <div class="card">
+      <h2>Insurance</h2>
+
+      <label>Your Location</label>
+      <div class="readonly-field" id="location-display">Loading…</div>
+
+      <form id="insurance-form">
+        <label for="insurance-provider">Insurance Provider</label>
+        <input type="text" id="insurance-provider" placeholder="e.g. Policybazaar" required />
+        <p class="hint">
+          We'll only show you nearby hospitals that accept this insurance —
+          any hospital not covered by it will be left out of your results.
+        </p>
+
+        <div class="error" id="error-msg"></div>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="insurance.js"></script>
+</body>
+</html>

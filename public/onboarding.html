@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Profile — Health 360</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Health 360</h1>
+    <p>Tell us a bit about yourself and who to contact in an emergency.</p>
+  </header>
+
+  <div class="page-wrap">
+    <div class="card">
+      <h2>Your Profile</h2>
+      <form id="onboarding-form">
+        <div class="section-title">Personal Info</div>
+
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required />
+
+        <label for="gender">Gender</label>
+        <select id="gender" required>
+          <option value="">Select…</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="non-binary">Non-binary</option>
+          <option value="prefer-not-to-say">Prefer not to say</option>
+        </select>
+
+        <label for="age">Age</label>
+        <input type="number" id="age" min="0" max="130" required />
+
+        <label for="height">Height (cm)</label>
+        <input type="number" id="height" min="0" step="0.1" required />
+
+        <label for="weight">Weight (kg)</label>
+        <input type="number" id="weight" min="0" step="0.1" required />
+
+        <label for="location">Location (city, state)</label>
+        <input type="text" id="location" placeholder="e.g. Austin, TX" required />
+
+        <div class="section-title">Emergency Contacts</div>
+        <p class="hint">Add at least one family member or emergency contact.</p>
+        <div id="contacts-container"></div>
+        <button type="button" class="secondary" id="add-contact">+ Add Another Contact</button>
+
+        <div class="error" id="error-msg"></div>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <template id="contact-template">
+    <div class="contact-block">
+      <button type="button" class="remove-contact">Remove</button>
+      <label>Contact Name</label>
+      <input type="text" class="contact-name" required />
+      <label>Relationship</label>
+      <input type="text" class="contact-relationship" placeholder="e.g. Mother, Spouse" required />
+      <label>Phone</label>
+      <input type="tel" class="contact-phone" required />
+      <label>Email (optional)</label>
+      <input type="email" class="contact-email" />
+    </div>
+  </template>
+
+  <script src="api.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>
