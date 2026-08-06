@@ -36,15 +36,19 @@ router.post('/', (req, res) => {
      VALUES (?, ?, ?, ?, ?)`
   );
 
-  const insertMany = db.transaction((rows) => {
-    // Replace any existing contacts for this user with the newly submitted set.
+  // Replace any existing contacts for this user with the newly submitted set.
+  db.exec('BEGIN');
+  try {
     db.prepare('DELETE FROM emergency_contacts WHERE user_id = ?').run(req.userId);
-    for (const c of rows) {
+    for (const c of contacts) {
       insert.run(req.userId, c.name, c.relationship, c.phone, c.email || null);
     }
-  });
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
 
-  insertMany(contacts);
   res.json({ ok: true });
 });
 
